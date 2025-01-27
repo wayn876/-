@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aprender Acordes en Piano</title>
+    <title>Piano Virtual Interactivo</title>
     <style>
-        /* Estilos básicos */
         body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -21,6 +20,7 @@
             display: flex;
             justify-content: center;
             margin-top: 20px;
+            position: relative;
         }
 
         .white-key, .black-key {
@@ -30,16 +30,30 @@
             background-color: white;
             border: 1px solid #000;
             box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        .white-key:active {
+            background-color: #f39c12;
         }
 
         .black-key {
             width: 30px;
             height: 100px;
             background-color: black;
-            position: relative;
+            position: absolute;
             z-index: 1;
             margin-left: -15px;
             margin-right: -15px;
+            cursor: pointer;
+        }
+
+        .black-key:active {
+            background-color: #f39c12;
+        }
+
+        .white-key:focus, .black-key:focus {
+            outline: none;
         }
 
         button {
@@ -55,33 +69,22 @@
         button:hover {
             background-color: #2980b9;
         }
-
-        #info {
-            margin-top: 20px;
-        }
-
-        #controls {
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Aprender Acordes en Piano</h1>
+        <h1>Piano Virtual Interactivo</h1>
     </header>
 
     <div id="keyboard">
-        <!-- Aquí irá el teclado virtual -->
+        <!-- Aquí irá el piano virtual -->
     </div>
 
-    <div id="controls">
-        <button id="showChord">Ver Acorde</button>
-        <button id="quizNotes">Hacer Test de Notas</button>
-    </div>
-
-    <div id="info">
-        <p id="chord-info">Acorde actual: <span id="chord-name">C Mayor</span></p>
-        <p id="note-info">Nota actual: <span id="note-name">C</span></p>
+    <div>
+        <button id="playC">Tocar C</button>
+        <button id="playD">Tocar D</button>
+        <button id="playE">Tocar E</button>
+        <button id="playF">Tocar F</button>
     </div>
 
     <!-- Incluyendo la librería Tone.js -->
@@ -120,44 +123,12 @@
         // Reproducir sonido de la tecla usando Tone.js
         function playSound(note) {
             synth.triggerAttackRelease(note, "8n"); // Reproduce la nota
-            updateNoteInfo(note);
+            highlightKey(note);
         }
 
-        // Mostrar la nota tocada en la interfaz
-        function updateNoteInfo(note) {
-            const noteInfo = document.getElementById('note-name');
-            noteInfo.textContent = note;
-        }
-
-        // Mostrar acorde en la interfaz (por ejemplo, acorde C)
-        function updateChordInfo(chord) {
-            const chordInfo = document.getElementById('chord-name');
-            chordInfo.textContent = chord;
-        }
-
-        // Muestra acordes y lecciones
-        document.getElementById('showChord').addEventListener('click', () => {
-            updateChordInfo('C Mayor'); // Esto puede ser dinámico según la lección
-        });
-
-        // Quiz para probar el conocimiento de las notas
-        document.getElementById('quizNotes').addEventListener('click', () => {
-            alert('¡Haz un test para ver si sabes las notas!');
-        });
-
-        // Mapeo de teclas del teclado físico
-        document.addEventListener('keydown', (event) => {
-            const key = event.key.toUpperCase(); // Hacemos que la tecla sea mayúscula
-            const keyMapping = keys.find(k => k.key === key);
-            if (keyMapping) {
-                playSound(keyMapping.note);
-                highlightKey(keyMapping.id);
-            }
-        });
-
-        // Resaltar las teclas al presionar
-        function highlightKey(id) {
-            const keyElement = document.getElementById(id);
+        // Resaltar la tecla tocada en el piano
+        function highlightKey(note) {
+            const keyElement = document.getElementById(note);
             if (keyElement) {
                 keyElement.style.backgroundColor = '#f39c12';
                 setTimeout(() => {
@@ -165,6 +136,21 @@
                 }, 200);
             }
         }
+
+        // Mapeo de teclas del teclado físico
+        document.addEventListener('keydown', (event) => {
+            const key = event.key.toUpperCase(); // Hacemos que la tecla sea mayúscula
+            const keyMapping = keys.find(k => k.key === key);
+            if (keyMapping) {
+                playSound(keyMapping.note);
+            }
+        });
+
+        // Añadir eventos de click a los botones para notas específicas
+        document.getElementById('playC').addEventListener('click', () => playSound('C4'));
+        document.getElementById('playD').addEventListener('click', () => playSound('D4'));
+        document.getElementById('playE').addEventListener('click', () => playSound('E4'));
+        document.getElementById('playF').addEventListener('click', () => playSound('F4'));
     </script>
 </body>
 </html>
