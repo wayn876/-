@@ -91,7 +91,7 @@
     <script src="https://cdn.jsdelivr.net/npm/tone@next"></script>
     
     <script>
-        // Usamos Tone.js para generar sonidos
+        // Configurar Tone.js y asegurarse de que se está ejecutando correctamente
         const synth = new Tone.Synth().toDestination();
 
         // Datos de las teclas del piano y su mapeo con las teclas del teclado
@@ -151,6 +151,14 @@
         document.getElementById('playD').addEventListener('click', () => playSound('D4'));
         document.getElementById('playE').addEventListener('click', () => playSound('E4'));
         document.getElementById('playF').addEventListener('click', () => playSound('F4'));
+
+        // Iniciar Tone.js
+        Tone.start().then(() => {
+            console.log("Tone.js está listo para funcionar");
+        }).catch(e => {
+            console.error("No se pudo iniciar Tone.js", e);
+        });
     </script>
 </body>
 </html>
+
