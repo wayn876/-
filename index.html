@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprender Acordes en Piano</title>
+    <style>
+        /* Estilos básicos */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        header h1 {
+            color: #333;
+        }
+
+        #keyboard {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .white-key, .black-key {
+            width: 40px;
+            height: 150px;
+            margin: 2px;
+            background-color: white;
+            border: 1px solid #000;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .black-key {
+            width: 30px;
+            height: 100px;
+            background-color: black;
+            position: relative;
+            z-index: 1;
+            margin-left: -15px;
+            margin-right: -15px;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #info {
+            margin-top: 20px;
+        }
+
+        #controls {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Aprender Acordes en Piano</h1>
+    </header>
+
+    <div id="keyboard">
+        <!-- Aquí irá el teclado virtual -->
+    </div>
+
+    <div id="controls">
+        <button id="showChord">Ver Acorde</button>
+        <button id="quizNotes">Hacer Test de Notas</button>
+    </div>
+
+    <div id="info">
+        <p id="chord-info">Acorde actual: <span id="chord-name">C Mayor</span></p>
+        <p id="note-info">Nota actual: <span id="note-name">C</span></p>
+    </div>
+
+    <!-- Incluyendo la librería Tone.js -->
+    <script src="https://cdn.jsdelivr.net/npm/tone@next"></script>
+    
+    <script>
+        // Usamos Tone.js para generar sonidos
+        const synth = new Tone.Synth().toDestination();
+
+        // Datos de las teclas del piano y su mapeo con las teclas del teclado
+        const keys = [
+            { note: 'C4', id: 'C', key: 'Q', keyType: 'white' },
+            { note: 'C#4', id: 'C-sharp', key: '2', keyType: 'black' },
+            { note: 'D4', id: 'D', key: 'W', keyType: 'white' },
+            { note: 'D#4', id: 'D-sharp', key: '3', keyType: 'black' },
+            { note: 'E4', id: 'E', key: 'E', keyType: 'white' },
+            { note: 'F4', id: 'F', key: 'R', keyType: 'white' },
+            { note: 'F#4', id: 'F-sharp', key: '5', keyType: 'black' },
+            { note: 'G4', id: 'G', key: 'T', keyType: 'white' },
+            { note: 'G#4', id: 'G-sharp', key: '6', keyType: 'black' },
+            { note: 'A4', id: 'A', key: 'Y', keyType: 'white' },
+            { note: 'A#4', id: 'A-sharp', key: '7', keyType: 'black' },
+            { note: 'B4', id: 'B', key: 'U', keyType: 'white' }
+        ];
+
+        // Crear el piano virtual
+        const keyboard = document.getElementById('keyboard');
+        keys.forEach(key => {
+            const keyElement = document.createElement('div');
+            keyElement.classList.add(key.keyType + '-key');
+            keyElement.id = key.id;
+            keyElement.addEventListener('click', () => playSound(key.note));
+            keyboard.appendChild(keyElement);
+        });
+
+        // Reproducir sonido de la tecla usando Tone.js
+        function playSound(note) {
+            synth.triggerAttackRelease(note, "8n"); // Reproduce la nota
+            updateNoteInfo(note);
+        }
+
+        // Mostrar la nota tocada en la interfaz
+        function updateNoteInfo(note) {
+            const noteInfo = document.getElementById('note-name');
+            noteInfo.textContent = note;
+        }
+
+        // Mostrar acorde en la interfaz (por ejemplo, acorde C)
+        function updateChordInfo(chord) {
+            const chordInfo = document.getElementById('chord-name');
+            chordInfo.textContent = chord;
+        }
+
+        // Muestra acordes y lecciones
+        document.getElementById('showChord').addEventListener('click', () => {
+            updateChordInfo('C Mayor'); // Esto puede ser dinámico según la lección
+        });
+
+        // Quiz para probar el conocimiento de las notas
+        document.getElementById('quizNotes').addEventListener('click', () => {
+            alert('¡Haz un test para ver si sabes las notas!');
+        });
+
+        // Mapeo de teclas del teclado físico
+        document.addEventListener('keydown', (event) => {
+            const key = event.key.toUpperCase(); // Hacemos que la tecla sea mayúscula
+            const keyMapping = keys.find(k => k.key === key);
+            if (keyMapping) {
+                playSound(keyMapping.note);
+                highlightKey(keyMapping.id);
+            }
+        });
+
+        // Resaltar las teclas al presionar
+        function highlightKey(id) {
+            const keyElement = document.getElementById(id);
+            if (keyElement) {
+                keyElement.style.backgroundColor = '#f39c12';
+                setTimeout(() => {
+                    keyElement.style.backgroundColor = '';
+                }, 200);
+            }
+        }
+    </script>
+</body>
+</html>
