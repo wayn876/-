@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Autoaprendizaje Funcional</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.0.0"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+        }
+        
+        #output {
+            border: 2px solid var(--primary);
+            padding: 1rem;
+            margin: 1rem 0;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div style="max-width: 800px; margin: 2rem auto;">
+        <h1>IA que Aprende Contigo</h1>
+        <input type="text" id="userInput" placeholder="Escribe una frase...">
+        <button onclick="trainAndGenerate()">Enseñar y Generar</button>
+        <div id="output"></div>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        let model;
+        let charSet = new Set();
+        let maxLength = 20;
+        let trainingData = [];
+
+        // 1. Crear modelo simplificado
+        async function createModel() {
+            model = tf.sequential({
+                layers: [
+                    tf.layers.embedding({inputDim: 100, outputDim: 16}),
+                    tf.layers.lstm({units: 64, returnSequences: true}),
+                    tf.layers.lstm({units: 64}),
+                    tf.layers.dense({units: 100, activation: 'softmax'})
+                ]
+            });
+
+            model.compile({
+                optimizer: 'adam',
+                loss: 'categoricalCrossentropy',
+                metrics: ['accuracy']
+            });
+        }
+
+        // 2. Convertir texto a números
+        function textToTensor(text) {
+            const chars = text.toLowerCase().split('').slice(0, maxLength);
+            chars.forEach(c => charSet.add(c));
+            const vocab = Array.from(charSet);
+            return chars.map(c => vocab.indexOf(c));
+        }
+
+        // 3. Generar texto
+        async function generateText() {
+            if (trainingData.length < 3) return "Escribe más ejemplos primero!";
+            
+            const seed = trainingData[Math.floor(Math.random() * trainingData.length)];
+            const input = textToTensor(seed);
+            const pred = model.predict(tf.tensor2d([input], [1, maxLength]));
+            const prediction = Array.from(pred.dataSync());
+            const vocab = Array.from(charSet);
+            
+            return prediction.map((_, i) => {
+                return vocab[Math.floor(Math.random() * vocab.length)];
+            }).join('');
+        }
+
+        // 4. Entrenamiento
+        async function trainModel() {
+            const xs = trainingData.map(d => textToTensor(d));
+            const ys = xs.slice(1).concat([xs[0]]); // Simular siguiente carácter
+            
+            const xTensor = tf.tensor2d(xs, [xs.length, maxLength]);
+            const yTensor = tf.oneHot(tf.tensor1d(ys.flat(), 'int32'), charSet.size);
+            
+            await model.fit(xTensor, yTensor, {
+                epochs: 10,
+                batchSize: 2,
+                callbacks: {
+                    onEpochEnd: (epoch, logs) => {
+                        document.getElementById('status').innerText = 
+                            `Entrenamiento: Época ${epoch+1} - Pérdida: ${logs.loss.toFixed(3)}`;
+                    }
+                }
+            });
+        }
+
+        // 5. Interfaz de usuario
+        async function trainAndGenerate() {
+            const input = document.getElementById('userInput').value;
+            if (!input) return;
+            
+            trainingData.push(input);
+            document.getElementById('userInput').value = '';
+            
+            if (!model) await createModel();
+            await trainModel();
+            
+            const generated = await generateText();
+            document.getElementById('output').innerHTML += `
+                <p><strong>Tú:</strong> ${input}</p>
+                <p><strong>IA:</strong> ${generated}</p>
+            `;
+        }
+
+        // Iniciar
+        createModel();
+    </script>
+</body>
+</html>
